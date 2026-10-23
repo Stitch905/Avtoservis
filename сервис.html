@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Система управления автосервисом: база клиентов, учет автомобилей и заказов-нарядов.">
+  <title>АвтоСервис — Система управления</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="сервисcss.css">
+
+  <script>
+    (function() {
+      var savedTheme = localStorage.getItem('theme');
+      if (!savedTheme) {
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        savedTheme = prefersDark ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      var savedAccent = localStorage.getItem('accentColor');
+      if (savedAccent) document.documentElement.style.setProperty('--accent', savedAccent);
+    })();
+  </script>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Перейти к основному контенту</a>
+
+  <header class="site-header">
+    <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="sidebar">
+      <span class="menu-toggle-bar" aria-hidden="true"></span>
+      <span class="menu-toggle-bar" aria-hidden="true"></span>
+      <span class="menu-toggle-bar" aria-hidden="true"></span>
+    </button>
+
+    <figure class="logo">
+      <img src="https://via.placeholder.com/40/2563eb/ffffff?text=АС" alt="Логотип АвтоСервис">
+      <figcaption>АвтоСервис</figcaption>
+    </figure>
+    <h1>Система управления</h1>
+
+    <div class="theme-controls" aria-label="Настройки оформления">
+      <label for="theme-select" class="sr-only">Тема</label>
+      <select id="theme-select" class="theme-select" aria-label="Выбор темы">
+        <option value="light">Светлая</option>
+        <option value="dark">Тёмная</option>
+        <option value="solarized">Solarized</option>
+      </select>
+
+      <label for="accent-color" class="accent-label" title="Акцентный цвет">
+        <input type="color" id="accent-color" value="#2563eb" aria-label="Акцентный цвет">
+      </label>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menu-overlay" hidden></div>
+
+  <div class="layout">
+
+    <nav class="sidebar" id="sidebar" aria-label="Основная навигация">
+      <h2 class="sidebar-title">Меню</h2>
+      <ul class="nav-list">
+        <li><a href="#" class="nav-link" data-target="clients">Клиенты</a></li>
+        <li><a href="#" class="nav-link" data-target="cars">Автомобили</a></li>
+        <li><a href="#" class="nav-link" data-target="orders">Заказы-наряды</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content" id="main-content">
+      <section class="tabs-section" aria-label="Навигация по разделам">
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab="clients" role="tab" aria-selected="true">Клиенты</button>
+          <button class="tab-btn" data-tab="cars" role="tab" aria-selected="false" tabindex="-1">Автомобили</button>
+          <button class="tab-btn" data-tab="orders" role="tab" aria-selected="false" tabindex="-1">Заказы</button>
+        </div>
+      </section>
+
+      <section class="filters-panel" aria-label="Фильтры">
+        <h2>Фильтры</h2>
+        <form class="filters-form" id="filters-form">
+          <p class="filter-group">
+            <label for="search-input">Поиск</label>
+            <input type="search" id="search-input" placeholder="Введите текст...">
+          </p>
+
+          <p class="filter-group">
+            <label for="status-select">Статус</label>
+            <select id="status-select" class="custom-select">
+              <option value="">Все статусы</option>
+              <option value="active">Активен</option>
+              <option value="vip">VIP</option>
+              <option value="inactive">Неактивен</option>
+              <option value="in_service">В работе</option>
+              <option value="ready">Готов</option>
+              <option value="new">Новый</option>
+              <option value="in_progress">В работе</option>
+              <option value="done">Выполнен</option>
+            </select>
+          </p>
+
+          <fieldset class="filter-group filter-checks">
+            <legend>Тип данных</legend>
+            <label class="custom-checkbox">
+              <input type="checkbox" name="entity" value="clients" checked>
+              <span>Клиенты</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" name="entity" value="cars" checked>
+              <span>Автомобили</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" name="entity" value="orders" checked>
+              <span>Заказы</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="filter-group filter-radios">
+            <legend>Вид</legend>
+            <label class="custom-radio">
+              <input type="radio" name="view" value="cards">
+              <span>Карточки</span>
+            </label>
+            <label class="custom-radio">
+              <input type="radio" name="view" value="table" checked>
+              <span>Таблица</span>
+            </label>
+          </fieldset>
+
+          <div class="filter-actions">
+            <button type="button" id="open-modal-btn" class="btn btn-primary">Добавить</button>
+            <button type="button" id="reset-btn" class="btn btn-secondary">Сбросить</button>
+          </div>
+        </form>
+      </section>
+
+      <div id="skeleton-loader" class="skeleton-container">
+        <div class="skeleton-block"></div>
+        <div class="skeleton-block"></div>
+      </div>
+
+      <div id="data-container" hidden>
+        <section id="clients" class="data-section" data-entity="clients">
+          <h2>Клиенты</h2>
+          <div class="table-wrapper" id="clients-table-wrapper">
+            <table class="orders-table" id="clients-table">
+              <caption>Список клиентов</caption>
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">ФИО</th>
+                  <th scope="col">Телефон</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Статус</th>
+                </tr>
+              </thead>
+              <tbody id="clients-table-body"></tbody>
+            </table>
+          </div>
+          <ul id="clients-list" class="card-list is-hidden"></ul>
+        </section>
+
+        <section id="cars" class="data-section" data-entity="cars" hidden>
+          <h2>Автомобили</h2>
+          <div class="table-wrapper" id="cars-table-wrapper">
+            <table class="orders-table" id="cars-table">
+              <caption>Список автомобилей</caption>
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Марка / Модель</th>
+                  <th scope="col">Госномер</th>
+                  <th scope="col">Статус</th>
+                </tr>
+              </thead>
+              <tbody id="cars-table-body"></tbody>
+            </table>
+          </div>
+          <ul id="cars-list" class="card-list is-hidden"></ul>
+        </section>
+
+        <section id="orders" class="data-section" data-entity="orders" hidden>
+          <h2>Заказы-наряды</h2>
+          <div class="table-wrapper" id="orders-table-wrapper">
+            <table class="orders-table" id="orders-table">
+              <caption>Сводная таблица заказов-нарядов</caption>
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Заказ</th>
+                  <th scope="col">Мастер</th>
+                  <th scope="col">Статус</th>
+                  <th scope="col">Цена, ₽</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body"></tbody>
+            </table>
+          </div>
+          <ul id="orders-list" class="card-list is-hidden"></ul>
+        </section>
+      </div>
+    </main>
+
+    <aside class="extra-panel" aria-label="Дополнительная информация">
+      <h2>Статистика</h2>
+      <article class="stat-card">
+        <h3>В работе</h3>
+        <p id="stat-in-progress">0</p>
+      </article>
+      <article class="stat-card">
+        <h3>Выполнено</h3>
+        <p id="stat-done">0</p>
+      </article>
+    </aside>
+
+  </div>
+
+  <footer class="site-footer">
+    <p>&copy; 2024 АвтоСервис.</p>
+    <address>г. Москва, ул. Автомобильная, д. 1</address>
+  </footer>
+
+  <div class="modal-overlay" id="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-header">
+        <h2 id="modal-title">Добавить клиента</h2>
+        <button type="button" class="modal-close" id="modal-close" aria-label="Закрыть">×</button>
+      </header>
+      <div class="modal-body">
+        <form id="add-client-form" novalidate>
+          <div class="form-group">
+            <label for="client-name">Имя *</label>
+            <input type="text" id="client-name" name="fullName" aria-describedby="error-name">
+            <span class="error-text" id="error-name" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="client-phone">Телефон *</label>
+            <input type="tel" id="client-phone" name="phone" aria-describedby="error-phone">
+            <span class="error-text" id="error-phone" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="client-email">Email *</label>
+            <input type="email" id="client-email" name="email" aria-describedby="error-email">
+            <span class="error-text" id="error-email" role="alert"></span>
+          </div>
+        </form>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modal-cancel">Отмена</button>
+        <button type="submit" form="add-client-form" class="btn btn-primary">Сохранить</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="сервисjs.js"></script>
+</body>
+</html>
